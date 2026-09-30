@@ -34,6 +34,9 @@ final class NightscoutFollowLinkTests: XCTestCase {
             ("http on a .local host", "\(base)?url=http%3A%2F%2Fnightscout.local", .success(.init(url: "http://nightscout.local", port: 0, token: nil))),
             ("http on 192.168 address", "\(base)?url=http%3A%2F%2F192.168.1.20&port=1337", .success(.init(url: "http://192.168.1.20", port: 1337, token: nil))),
             ("http on 10 address", "\(base)?url=http%3A%2F%2F10.0.0.2", .success(.init(url: "http://10.0.0.2", port: 0, token: nil))),
+            ("http on first Tailscale address", "\(base)?url=http%3A%2F%2F100.64.0.0", .success(.init(url: "http://100.64.0.0", port: 0, token: nil))),
+            ("http inside the Tailscale range", "\(base)?url=http%3A%2F%2F100.101.102.103&port=8080", .success(.init(url: "http://100.101.102.103", port: 8080, token: nil))),
+            ("http on last Tailscale address", "\(base)?url=http%3A%2F%2F100.127.255.255", .success(.init(url: "http://100.127.255.255", port: 0, token: nil))),
             ("http on 172.16 address", "\(base)?url=http%3A%2F%2F172.31.255.1", .success(.init(url: "http://172.31.255.1", port: 0, token: nil))),
 
             // missing or unreadable url
@@ -51,6 +54,8 @@ final class NightscoutFollowLinkTests: XCTestCase {
             ("other scheme", "\(base)?url=ftp%3A%2F%2Fexample.com", .failure(.insecureURL)),
             ("http on localhost", "\(base)?url=http%3A%2F%2Flocalhost", .failure(.insecureURL)),
             ("http just outside 172.16 to 172.31", "\(base)?url=http%3A%2F%2F172.32.0.1", .failure(.insecureURL)),
+            ("http just below the Tailscale range", "\(base)?url=http%3A%2F%2F100.63.255.255", .failure(.insecureURL)),
+            ("http just above the Tailscale range", "\(base)?url=http%3A%2F%2F100.128.0.0", .failure(.insecureURL)),
             ("http on a public address", "\(base)?url=http%3A%2F%2F8.8.8.8", .failure(.insecureURL)),
             ("http on 192.169 address", "\(base)?url=http%3A%2F%2F192.169.1.1", .failure(.insecureURL)),
             ("http on a name that only ends in local", "\(base)?url=http%3A%2F%2Fexample.locale", .failure(.insecureURL)),

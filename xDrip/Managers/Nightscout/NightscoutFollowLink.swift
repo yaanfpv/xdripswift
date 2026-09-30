@@ -70,8 +70,9 @@ enum NightscoutFollowLinkError: Error, Equatable {
 /// Validation rules, all of which must hold or the whole link is refused:
 /// - `url` is required, appears once, and is a bare server address: scheme and host only, with no
 ///   port, path (other than a single trailing `/`), query, fragment or credentials.
-/// - The scheme is `https`. `http` is accepted only when the host is a `.local` name or a private
-///   IPv4 address (10/8, 172.16/12, 192.168/16).
+/// - The scheme is `https`. `http` is accepted only when the host is a `.local` name, a private
+///   IPv4 address (10/8, 172.16/12, 192.168/16) or a Tailscale address (100.64.0.0/10, which
+///   Tailscale encrypts end to end).
 /// - The host is ASCII letters, digits, `-` and `.` only (IDN hosts arrive as punycode).
 /// - `port` is optional and, when present, is digits only within 1...65535.
 /// - `token` is optional and, when present, is 1 to 128 characters from `A-Z a-z 0-9 - _`.
@@ -175,6 +176,7 @@ struct NightscoutFollowLink: Equatable {
         switch (bytes[0], bytes[1]) {
         case (10, _), (192, 168): return true
         case (172, 16...31): return true
+        case (100, 64...127): return true
         default: return false
         }
     }
